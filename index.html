@@ -3,140 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Подключаем скрипт Telegram -->
     <script src="https://telegram.org"></script>
     <style>
-        :root {
-            --bg: var(--tg-theme-bg-color, #ffffff);
-            --text: var(--tg-theme-text-color, #000000);
-            --hint: var(--tg-theme-hint-color, #999999);
-            --btn: var(--tg-theme-button-color, #2481cc);
-            --btn-text: var(--tg-theme-button-text-color, #ffffff);
-            --sec-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, sans-serif;
-            margin: 0; padding: 0;
-            overflow: hidden;
+        body { 
+            background-color: #ffffff; color: #000000; 
+            font-family: sans-serif; margin: 0; padding: 0;
             display: flex; align-items: center; justify-content: center; height: 100vh;
         }
-
-        /* Экран приветствия */
-        #welcome { text-align: center; transition: 0.3s; }
         .start-btn { 
-            background: var(--btn); color: var(--btn-text);
+            background: #2481cc; color: #ffffff;
             border: none; border-radius: 50px; padding: 18px 45px;
             font-size: 18px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 999; /* Чтобы точно была поверх всего */
         }
-
-        /* Основной контейнер */
-        #app { display: none; width: 100%; height: 100vh; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .page { display: none; animation: slideIn 0.3s ease-out; }
-        .active { display: block; }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h2 { font-size: 22px; margin-bottom: 20px; }
-        .card {
-            background: var(--sec-bg); border-radius: 15px;
-            padding: 15px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-select {
-            background: var(--btn); color: var(--btn-text);
-            border: none; border-radius: 10px; padding: 10px 20px; font-weight: 600;
-        }
-
-        /* Сетка дат */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .date-card {
-            background: var(--sec-bg); padding: 15px; border-radius: 12px;
-            text-align: center; cursor: pointer; border: 2px solid transparent;
-        }
-        .date-card.selected { border-color: var(--btn); background: var(--btn); color: var(--btn-text); }
-        
-        .back { color: var(--btn); background: none; border: none; margin-bottom: 20px; font-size: 16px; cursor: pointer; }
+        #app-content { display: none; padding: 20px; text-align: center; width: 100%; }
     </style>
 </head>
 <body>
 
     <div id="welcome">
-        <button class="start-btn" onclick="initApp()">✨ Записаться онлайн</button>
+        <button class="start-btn" id="mainButton">✨ Записаться онлайн</button>
     </div>
 
-    <div id="app">
-        <!-- Экран услуг -->
-        <div id="p-services" class="page active">
-            <h2>Выберите услугу</h2>
-            <div class="card">
-                <div><b>Маникюр</b><br><small>1500₽ • 60 мин</small></div>
-                <button class="btn-select" onclick="toDates('Маникюр')">Выбрать</button>
-            </div>
-            <div class="card">
-                <div><b>Педикюр</b><br><small>2000₽ • 90 мин</small></div>
-                <button class="btn-select" onclick="toDates('Педикюр')">Выбрать</button>
-            </div>
-        </div>
-
-        <!-- Экран дат -->
-        <div id="p-dates" class="page">
-            <button class="back" onclick="toServices()">← Назад</button>
-            <h2 id="svc-name">Дата записи</h2>
-            <div class="grid">
-                <div class="date-card" onclick="setD(this, '25.04')">25 Апреля</div>
-                <div class="date-card" onclick="setD(this, '26.04')">26 Апреля</div>
-                <div class="date-card" onclick="setD(this, '27.04')">27 Апреля</div>
-                <div class="date-card" onclick="setD(this, '28.04')">28 Апреля</div>
-            </div>
-        </div>
+    <div id="app-content">
+        <h2>✅ Приложение запущено!</h2>
+        <p>Выберите услугу:</p>
+        <button onclick="location.reload()">Обновить</button>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        let s = "", d = "";
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        
+        // Сообщаем Telegram, что мы готовы
+        tg.ready();
 
-        function initApp() {
-            try { if (tg.requestFullscreen) tg.requestFullscreen(); } catch (e) {}
+        // Вешаем событие на кнопку через JavaScript (так надежнее)
+        document.getElementById('mainButton').addEventListener('click', function() {
+            // Расширяем на весь экран
             tg.expand();
+            try {
+                if (tg.requestFullscreen) tg.requestFullscreen();
+            } catch (e) {}
+
+            // Переключаем экраны
             document.getElementById('welcome').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
+            document.getElementById('app-content').style.display = 'block';
             document.body.style.alignItems = 'flex-start';
-        }
-
-        function toDates(name) {
-            s = name;
-            document.getElementById('svc-name').innerText = name;
-            show('p-dates');
-        }
-
-        function toServices() {
-            tg.MainButton.hide();
-            show('p-services');
-        }
-
-        function show(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function setD(el, date) {
-            d = date;
-            document.querySelectorAll('.date-card').forEach(c => c.classList.remove('selected'));
-            el.classList.add('selected');
             
-            tg.MainButton.setText("ЗАПИСАТЬСЯ НА " + d);
-            tg.MainButton.show();
-        }
-
-        tg.onEvent('mainButtonClicked', () => {
-            tg.sendData(`BOOK|${s}|${d}`);
-            tg.close();
+            // Вибрация (для проверки, что клик прошел)
+            tg.HapticFeedback.impactOccurred('medium');
         });
     </script>
 </body>
