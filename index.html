@@ -1,60 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Подключаем скрипт Telegram -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org"></script>
     <style>
         body { 
-            background-color: #ffffff; color: #000000; 
-            font-family: sans-serif; margin: 0; padding: 0;
-            display: flex; align-items: center; justify-content: center; height: 100vh;
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; font-family: sans-serif;
+            background-color: white; 
         }
-        .start-btn { 
-            background: #2481cc; color: #ffffff;
-            border: none; border-radius: 50px; padding: 18px 45px;
-            font-size: 18px; font-weight: bold; cursor: pointer;
-            z-index: 999; /* Чтобы точно была поверх всего */
+        #btn { 
+            padding: 20px 40px; font-size: 20px; font-weight: bold;
+            color: white; background-color: #2481cc; 
+            border: none; border-radius: 15px; cursor: pointer;
         }
-        #app-content { display: none; padding: 20px; text-align: center; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div id="welcome">
-        <button class="start-btn" id="mainButton">✨ Записаться онлайн</button>
-    </div>
-
-    <div id="app-content">
-        <h2>✅ Приложение запущено!</h2>
-        <p>Выберите услугу:</p>
-        <button onclick="location.reload()">Обновить</button>
-    </div>
+    <button id="btn">ПРОВЕРИТЬ РАБОТУ</button>
 
     <script>
-        // Инициализация Telegram Web App
+        // Инициализация
         const tg = window.Telegram.WebApp;
-        
-        // Сообщаем Telegram, что мы готовы
         tg.ready();
 
-        // Вешаем событие на кнопку через JavaScript (так надежнее)
-        document.getElementById('mainButton').addEventListener('click', function() {
-            // Расширяем на весь экран
+        // Логика нажатия
+        document.getElementById('btn').onclick = function() {
+            alert("Кнопка нажата! JavaScript работает! 🎉");
+            this.style.backgroundColor = "green";
+            this.innerText = "РАБОТАЕТ ✅";
             tg.expand();
-            try {
-                if (tg.requestFullscreen) tg.requestFullscreen();
-            } catch (e) {}
-
-            // Переключаем экраны
-            document.getElementById('welcome').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            document.body.style.alignItems = 'flex-start';
-            
-            // Вибрация (для проверки, что клик прошел)
-            tg.HapticFeedback.impactOccurred('medium');
-        });
+        };
     </script>
 </body>
 </html>
