@@ -5,64 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org"></script>
     <style>
-        body { background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); font-family: sans-serif; padding: 20px; }
+        body { 
+            background-color: var(--tg-theme-bg-color, #ffffff); 
+            color: var(--tg-theme-text-color, #000000); 
+            font-family: sans-serif; 
+            padding: 20px; 
+            margin: 0;
+            height: 100vh; /* Растягиваем на всю высоту */
+        }
         .page { display: none; }
         .active { display: block; }
-        .card { background: var(--tg-theme-secondary-bg-color, #f0f0f0); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn { background: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 8px; padding: 10px 20px; font-weight: bold; cursor: pointer; }
-        .date-item { background: var(--tg-theme-secondary-bg-color, #f0f0f0); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 10px; cursor: pointer; }
-        .selected { background: var(--tg-theme-button-color, #2481cc) !important; color: white !important; }
+        .card { 
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0); 
+            border-radius: 12px; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .btn { 
+            background: var(--tg-theme-button-color, #2481cc); 
+            color: var(--tg-theme-button-text-color, #ffffff); 
+            border: none; 
+            border-radius: 8px; 
+            padding: 10px 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
     </style>
 </head>
 <body>
     <div id="p1" class="page active">
-        <h2>✨ Услуги</h2>
+        <h2>✨ Полноэкранный режим</h2>
         <div class="card">
-            <span>Маникюр</span>
-            <button class="btn" onclick="toP2('Маникюр')">Выбрать</button>
-        </div>
-        <div class="card">
-            <span>Педикюр</span>
-            <button class="btn" onclick="toP2('Педикюр')">Выбрать</button>
+            <span>Услуга 1</span>
+            <button class="btn" onclick="toP2('Услуга 1')">Выбрать</button>
         </div>
     </div>
 
     <div id="p2" class="page">
-        <button onclick="toP1()" style="color:var(--tg-theme-link-color); background:none; border:none;">← Назад</button>
+        <button onclick="toP1()" style="color:var(--tg-theme-link-color); background:none; border:none; padding:10px 0;">← Назад</button>
         <h2 id="title">Дата</h2>
-        <div class="date-item" onclick="selD(this, '25.04')">25 Апреля</div>
-        <div class="date-item" onclick="selD(this, '26.04')">26 Апреля</div>
+        <p>Теперь приложение занимает весь экран!</p>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
+
+        // 1. Сначала просто расширяем (стандартный метод)
         tg.expand();
-        let s = "", d = "";
+
+        // 2. Пытаемся включить ПОЛНЫЙ экран (Mini Apps 2.0)
+        try {
+            if (tg.requestFullscreen) {
+                tg.requestFullscreen();
+            }
+        } catch (e) {
+            console.log("Метод Fullscreen пока не поддерживается на этом устройстве");
+        }
 
         function toP2(name) {
-            s = name;
             document.getElementById('title').innerText = name;
             document.getElementById('p1').classList.remove('active');
             document.getElementById('p2').classList.add('active');
         }
 
         function toP1() {
-            tg.MainButton.hide();
             document.getElementById('p2').classList.remove('active');
             document.getElementById('p1').classList.add('active');
         }
-
-        function selD(el, date) {
-            d = date;
-            document.querySelectorAll('.date-item').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-            tg.MainButton.setText("ЗАПИСАТЬСЯ: " + s + " (" + d + ")");
-            tg.MainButton.show();
-        }
-
-        tg.onEvent('mainButtonClicked', function() {
-            tg.sendData("BOOK:" + s + ":" + d);
-        });
     </script>
 </body>
 </html>
