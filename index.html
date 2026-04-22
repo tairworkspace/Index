@@ -5,116 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org"></script>
     <style>
-        :root {
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #000000);
-            --hint-color: var(--tg-theme-hint-color, #999999);
-            --button-color: var(--tg-theme-button-color, #2481cc);
-            --button-text: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: sans-serif;
-            margin: 0; padding: 15px;
-            -webkit-user-select: none;
-        }
-
+        body { background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); font-family: sans-serif; padding: 20px; }
         .page { display: none; }
         .active { display: block; }
-
-        .card {
-            background: var(--secondary-bg);
-            border-radius: 12px;
-            padding: 15px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        .btn {
-            background: var(--button-color);
-            color: var(--button-text);
-            border: none; border-radius: 8px;
-            padding: 10px 20px; font-weight: bold;
-        }
-
-        .calendar-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-        }
-
-        .date-item {
-            background: var(--secondary-bg);
-            padding: 15px; border-radius: 10px;
-            text-align: center; font-weight: bold;
-        }
-
-        .selected {
-            background: var(--button-color) !important;
-            color: var(--button-text) !important;
-        }
-
-        .back-btn { color: var(--button-color); background: none; border: none; margin-bottom: 15px; cursor: pointer; }
+        .card { background: var(--tg-theme-secondary-bg-color, #f0f0f0); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn { background: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 8px; padding: 10px 20px; font-weight: bold; cursor: pointer; }
+        .date-item { background: var(--tg-theme-secondary-bg-color, #f0f0f0); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 10px; cursor: pointer; }
+        .selected { background: var(--tg-theme-button-color, #2481cc) !important; color: white !important; }
     </style>
 </head>
 <body>
-
-    <!-- СТРАНИЦА 1 -->
-    <div id="services-page" class="page active">
-        <h2>✨ Выберите услугу</h2>
+    <div id="p1" class="page active">
+        <h2>✨ Услуги</h2>
         <div class="card">
-            <div><b>Маникюр</b><br><small>1500₽</small></div>
-            <button class="btn" onclick="goToCalendar('Маникюр')">Выбрать</button>
+            <span>Маникюр</span>
+            <button class="btn" onclick="toP2('Маникюр')">Выбрать</button>
         </div>
         <div class="card">
-            <div><b>Педикюр</b><br><small>2000₽</small></div>
-            <button class="btn" onclick="goToCalendar('Педикюр')">Выбрать</button>
+            <span>Педикюр</span>
+            <button class="btn" onclick="toP2('Педикюр')">Выбрать</button>
         </div>
     </div>
 
-    <!-- СТРАНИЦА 2 -->
-    <div id="calendar-page" class="page">
-        <button class="back-btn" onclick="goToServices()">← Назад</button>
-        <h2 id="svc-title">Дата</h2>
-        <div class="calendar-grid">
-            <div class="date-item" onclick="selectDate(this, '25.04')">25 Апр</div>
-            <div class="date-item" onclick="selectDate(this, '26.04')">26 Апр</div>
-            <div class="date-item" onclick="selectDate(this, '27.04')">27 Апр</div>
-            <div class="date-item" onclick="selectDate(this, '28.04')">28 Апр</div>
-        </div>
+    <div id="p2" class="page">
+        <button onclick="toP1()" style="color:var(--tg-theme-link-color); background:none; border:none;">← Назад</button>
+        <h2 id="title">Дата</h2>
+        <div class="date-item" onclick="selD(this, '25.04')">25 Апреля</div>
+        <div class="date-item" onclick="selD(this, '26.04')">26 Апреля</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        
-        let selSvc = "";
-        let selDate = "";
+        let s = "", d = "";
 
-        function goToCalendar(svc) {
-            selSvc = svc;
-            document.getElementById('svc-title').innerText = svc + ": дата";
-            document.getElementById('services-page').classList.remove('active');
-            document.getElementById('calendar-page').classList.add('active');
+        function toP2(name) {
+            s = name;
+            document.getElementById('title').innerText = name;
+            document.getElementById('p1').classList.remove('active');
+            document.getElementById('p2').classList.add('active');
         }
 
-        function goToServices() {
+        function toP1() {
             tg.MainButton.hide();
-            document.getElementById('calendar-page').classList.remove('active');
-            document.getElementById('services-page').classList.add('active');
+            document.getElementById('p2').classList.remove('active');
+            document.getElementById('p1').classList.add('active');
         }
 
-        function selectDate(el, date) {
-            selDate = date;
-            document.querySelectorAll('.date-item').forEach(d => d.classList.remove('selected'));
+        function selD(el, date) {
+            d = date;
+            document.querySelectorAll('.date-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
-            
-            tg.MainButton.text = "ЗАПИСАТЬСЯ НА " + date;
+            tg.MainButton.setText("ЗАПИСАТЬСЯ: " + s + " (" + d + ")");
             tg.MainButton.show();
         }
 
         tg.onEvent('mainButtonClicked', function() {
-            tg.sendData("Запись: " + selSvc + " | Дата: " + selDate);
+            tg.sendData("BOOK:" + s + ":" + d);
         });
     </script>
 </body>
