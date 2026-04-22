@@ -1,31 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org"></script>
     <style>
-        body { background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); font-family: sans-serif; padding: 20px; }
-        .service-card { background: var(--tg-theme-secondary-bg-color); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        button { background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #ffffff);
+            --text-color: var(--tg-theme-text-color, #000000);
+            --hint-color: var(--tg-theme-hint-color, #999999);
+            --button-color: var(--tg-theme-button-color, #2481cc);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        /* Анимация переходов */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        h2 { font-size: 20px; margin-bottom: 20px; }
+
+        .card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.1s;
+        }
+        .card:active { transform: scale(0.98); }
+
+        .info b { display: block; font-size: 16px; }
+        .info span { color: var(--hint-color); font-size: 14px; }
+
+        .btn {
+            background: var(--button-color);
+            color: var(--button-text);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Сетка календаря */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .date-item {
+            background: var(--secondary-bg);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .selected {
+            background: var(--button-color) !important;
+            color: var(--button-text) !important;
+        }
+
+        .back-btn {
+            background: none;
+            color: var(--button-color);
+            border: none;
+            padding: 0;
+            margin-bottom: 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <h2>✨ Наш Прайс</h2>
-    <div class="service-card">
-        <div>
-            <strong>Маникюр</strong><br>
-            <span>1500₽ • 60 мин</span>
+
+    <!-- СТРАНИЦА 1: УСЛУГИ -->
+    <div id="services-page" class="page active">
+        <h2>✨ Выберите услугу</h2>
+        <div class="card">
+            <div class="info">
+                <b>Маникюр</b>
+                <span>1500₽ • 60 мин</span>
+            </div>
+            <button class="btn" onclick="goToCalendar('Маникюр')">Выбрать</button>
         </div>
-        <button onclick="selectService('Маникюр')">Выбрать</button>
+        <div class="card">
+            <div class="info">
+                <b>Педикюр</b>
+                <span>2000₽ • 90 мин</span>
+            </div>
+            <button class="btn" onclick="goToCalendar('Педикюр')">Выбрать</button>
+        </div>
     </div>
-    
+
+    <!-- СТРАНИЦА 2: КАЛЕНДАРЬ -->
+    <div id="calendar-page" class="page">
+        <button class="back-btn" onclick="goToServices()">← Назад к услугам</button>
+        <h2 id="selected-service-title">Выберите дату</h2>
+        <div class="calendar-grid">
+            <div class="date-item" onclick="selectDate(this, '25.05')">25 Пн</div>
+            <div class="date-item" onclick="selectDate(this, '26.05')">26 Вт</div>
+            <div class="date-item" onclick="selectDate(this, '27.05')">27 Ср</div>
+            <div class="date-item" onclick="selectDate(this, '28.05')">28 Чт</div>
+        </div>
+    </div>
+
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand();
+        
+        let selectedService = "";
+        let selectedDate = "";
 
-        function selectService(name) {
-            tg.sendData("Выбрана услуга: " + name); // Отправляет текст обратно боту
-            tg.close(); // Закрывает окно
+        // Настройка главной кнопки Telegram
+        tg.MainButton.setText("ПОДТВЕРДИТЬ ЗАПИСЬ");
+        tg.MainButton.textColor = "#ffffff";
+        tg.MainButton.color = "#2481cc";
+
+        function goToCalendar(service) {
+            selectedService = service;
+            document.getElementById('selected-service-title').innerText = service + ": выберите дату";
+            showPage('calendar-page');
         }
+
+        function goToServices() {
+            tg.MainButton.hide();
+            showPage('services-page');
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function selectDate(element, date) {
+            selectedDate = date;
+            document.querySelectorAll('.date-item').forEach(d => d.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            // Показываем главную кнопку Telegram снизу
+            tg.MainButton.show();
+        }
+
+        // Обработка нажатия на главную кнопку
+        tg.onEvent('mainButtonClicked', function() {
+            let result = "Выбрано: " + selectedService + " на " + selectedDate;
+            tg.sendData(result); // Отправляем данные боту
+        });
     </script>
 </body>
 </html>
