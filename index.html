@@ -8,72 +8,53 @@
         body { 
             background-color: var(--tg-theme-bg-color, #ffffff); 
             color: var(--tg-theme-text-color, #000000); 
-            font-family: sans-serif; 
-            padding: 20px; 
-            margin: 0;
-            height: 100vh; /* Растягиваем на всю высоту */
+            font-family: sans-serif; margin: 0; padding: 0;
+            display: flex; align-items: center; justify-content: center; height: 100vh;
         }
-        .page { display: none; }
-        .active { display: block; }
-        .card { 
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0); 
-            border-radius: 12px; 
-            padding: 15px; 
-            margin-bottom: 10px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .btn { 
+        #welcome-screen { text-align: center; }
+        .main-btn { 
             background: var(--tg-theme-button-color, #2481cc); 
             color: var(--tg-theme-button-text-color, #ffffff); 
-            border: none; 
-            border-radius: 8px; 
-            padding: 10px 20px; 
-            font-weight: bold; 
-            cursor: pointer; 
+            border: none; border-radius: 50px; padding: 15px 40px; 
+            font-size: 18px; font-weight: bold; cursor: pointer;
         }
+        .content { display: none; padding: 20px; width: 100%; height: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
-    <div id="p1" class="page active">
-        <h2>✨ Полноэкранный режим</h2>
-        <div class="card">
-            <span>Услуга 1</span>
-            <button class="btn" onclick="toP2('Услуга 1')">Выбрать</button>
-        </div>
+
+    <!-- Экран-заставка (нужен для активации Fullscreen) -->
+    <div id="welcome-screen">
+        <button class="main-btn" onclick="startApp()">✨ Открыть меню</button>
     </div>
 
-    <div id="p2" class="page">
-        <button onclick="toP1()" style="color:var(--tg-theme-link-color); background:none; border:none; padding:10px 0;">← Назад</button>
-        <h2 id="title">Дата</h2>
-        <p>Теперь приложение занимает весь экран!</p>
+    <!-- Основной контент -->
+    <div id="content" class="content">
+        <h2>💎 Полноэкранный прайс</h2>
+        <p>Теперь это полноценное приложение!</p>
+        <button onclick="location.reload()" style="background:none; border:1px solid gray; padding:10px; border-radius:10px;">Обновить страницу</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
+        tg.expand(); // Сразу расширяем до 80%
 
-        // 1. Сначала просто расширяем (стандартный метод)
-        tg.expand();
-
-        // 2. Пытаемся включить ПОЛНЫЙ экран (Mini Apps 2.0)
-        try {
-            if (tg.requestFullscreen) {
-                tg.requestFullscreen();
+        function startApp() {
+            // Активируем полный экран ПОСЛЕ КЛИКА
+            try {
+                if (tg.requestFullscreen) {
+                    tg.requestFullscreen(); 
+                }
+            } catch (e) {
+                console.log("Полный экран не поддерживается");
             }
-        } catch (e) {
-            console.log("Метод Fullscreen пока не поддерживается на этом устройстве");
-        }
 
-        function toP2(name) {
-            document.getElementById('title').innerText = name;
-            document.getElementById('p1').classList.remove('active');
-            document.getElementById('p2').classList.add('active');
-        }
-
-        function toP1() {
-            document.getElementById('p2').classList.remove('active');
-            document.getElementById('p1').classList.add('active');
+            // Переключаем экраны
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            // Меняем цвет фона body, чтобы убрать центрирование
+            document.body.style.display = 'block';
         }
     </script>
 </body>
