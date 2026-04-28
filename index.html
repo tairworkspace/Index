@@ -2,59 +2,81 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BeautyBook</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://telegram.org"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary-color: #534AB7;
+      --bg-color: var(--tg-theme-bg-color, #ffffff);
+      --text-color: var(--tg-theme-text-color, #000000);
+      --hint-color: var(--tg-theme-hint-color, #888888);
+      --secondary-bg: var(--tg-theme-secondary-bg-color, #f7f7f7);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
     body {
-      font-family: -apple-system, sans-serif;
-      background: var(--tg-theme-bg-color, #fff);
-      color: var(--tg-theme-text-color, #000);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
       padding: 16px;
+      padding-bottom: 80px; /* Место под MainButton */
     }
-    .header {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 20px;
-    }
-    .avatar {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: #EEEDFE; color: #3C3489;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 600;
-    }
-    .master-name { font-size: 17px; font-weight: 600; }
-    .master-spec { font-size: 13px; color: #888; margin-top: 2px; }
-    .rating { font-size: 12px; color: #BA7517; margin-top: 2px; }
-    .section { font-size: 13px; font-weight: 600; color: #888;
-      margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .service {
-      background: #f7f7f7; border-radius: 12px;
-      padding: 14px 16px; margin-bottom: 8px;
-      display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; border: 2px solid transparent; transition: all .15s;
-    }
-    .service.selected { border-color: #534AB7; background: #EEEDFE; }
-    .service-name { font-size: 14px; font-weight: 500; }
-    .service-dur { font-size: 12px; color: #888; margin-top: 2px; }
-    .service-price { font-size: 14px; font-weight: 600; color: #534AB7; }
-    .btn {
-      width: 100%; padding: 15px; border-radius: 14px;
-      background: #534AB7; color: #fff; font-size: 16px;
-      font-weight: 600; border: none; cursor: pointer;
-      margin-top: 24px; transition: opacity .15s;
-    }
-    .btn:disabled { opacity: 0.4; }
+
     .user-hello {
-      background: #E1F5EE; border-radius: 12px;
-      padding: 12px 16px; margin-bottom: 20px;
-      font-size: 14px; color: #085041;
+      background: #E1F5EE;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #085041;
+      display: none; /* Покажем, когда данные загрузятся */
     }
+
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: #EEEDFE; color: var(--primary-color);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 600;
+    }
+
+    .master-name { font-size: 18px; font-weight: 700; }
+    .master-spec { font-size: 13px; color: var(--hint-color); margin-top: 2px; }
+    .rating { font-size: 12px; color: #BA7517; margin-top: 4px; }
+
+    .section-title {
+      font-size: 13px; font-weight: 600; color: var(--hint-color);
+      margin: 24px 0 12px; text-transform: uppercase; letter-spacing: 0.8px;
+    }
+
+    .service {
+      background: var(--secondary-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .service.selected {
+      border-color: var(--primary-color);
+      background: #EEEDFE;
+    }
+
+    .service-name { font-size: 15px; font-weight: 600; }
+    .service-dur { font-size: 13px; color: var(--hint-color); margin-top: 2px; }
+    .service-price { font-size: 15px; font-weight: 700; color: var(--primary-color); }
   </style>
 </head>
 <body>
 
-<div class="user-hello" id="hello">Загрузка...</div>
+<div id="hello" class="user-hello"></div>
 
 <div class="header">
   <div class="avatar">АС</div>
@@ -65,9 +87,9 @@
   </div>
 </div>
 
-<div class="section">Выбери услугу</div>
+<div class="section-title">Доступные услуги</div>
 
-<div class="service" onclick="select(this, 'Маникюр + покрытие', 1800)">
+<div class="service" onclick="selectService(this, 'Маникюр + покрытие', 1800)">
   <div>
     <div class="service-name">Маникюр + покрытие</div>
     <div class="service-dur">75 мин</div>
@@ -75,7 +97,7 @@
   <div class="service-price">1 800 ₽</div>
 </div>
 
-<div class="service" onclick="select(this, 'Педикюр', 2200)">
+<div class="service" onclick="selectService(this, 'Педикюр', 2200)">
   <div>
     <div class="service-name">Педикюр</div>
     <div class="service-dur">90 мин</div>
@@ -83,7 +105,7 @@
   <div class="service-price">2 200 ₽</div>
 </div>
 
-<div class="service" onclick="select(this, 'Коррекция бровей', 900)">
+<div class="service" onclick="selectService(this, 'Коррекция бровей', 900)">
   <div>
     <div class="service-name">Коррекция бровей</div>
     <div class="service-dur">30 мин</div>
@@ -91,44 +113,58 @@
   <div class="service-price">900 ₽</div>
 </div>
 
-<div class="service" onclick="select(this, 'Маникюр + педикюр', 3500)">
-  <div>
-    <div class="service-name">Маникюр + педикюр</div>
-    <div class="service-dur">2.5 часа</div>
-  </div>
-  <div class="service-price">3 500 ₽</div>
-</div>
-
-<button class="btn" id="btn" disabled onclick="book()">Выбери услугу</button>
-
 <script>
-  const tg = window.Telegram.WebApp
-  tg.expand()
-  tg.setHeaderColor('#534AB7')
+  const tg = window.Telegram.WebApp;
+  let selectedService = null;
 
-  const user = tg.initDataUnsafe?.user
-  const hello = document.getElementById('hello')
+  // Инициализация
+  tg.expand();
+  tg.ready();
+  tg.setHeaderColor('secondary_bg_color');
+
+  // Приветствие пользователя
+  const user = tg.initDataUnsafe?.user;
+  const helloBox = document.getElementById('hello');
   if (user) {
-    hello.textContent = 'Привет, ' + (user.first_name || 'гость') + '! Выбери услугу и запишись 👇'
-  } else {
-    hello.textContent = 'Выбери услугу и запишись 👇'
+    helloBox.textContent = `Привет, ${user.first_name || 'гость'}! Выбери услугу 👇`;
+    helloBox.style.display = 'block';
   }
 
-  let selected = null
+  function selectService(el, name, price) {
+    // 1. Легкая вибрация при выборе
+    tg.HapticFeedback.impactOccurred('light');
 
-  function select(el, name, price) {
-    document.querySelectorAll('.service').forEach(s => s.classList.remove('selected'))
-    el.classList.add('selected')
-    selected = { name, price }
-    const btn = document.getElementById('btn')
-    btn.disabled = false
-    btn.textContent = 'Записаться — ' + price.toLocaleString('ru') + ' ₽'
+    // 2. Визуальное выделение
+    document.querySelectorAll('.service').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+
+    selectedService = { name, price };
+
+    // 3. Настройка нативной главной кнопки (MainButton)
+    tg.MainButton.setParams({
+      text: `ЗАПИСАТЬСЯ (${price} ₽)`,
+      color: '#534AB7',
+      text_color: '#ffffff',
+      is_visible: true,
+      is_active: true
+    });
   }
 
-  function book() {
-    if (!selected) return
-    tg.showAlert('Запись на "' + selected.name + '" оформлена! Мастер скоро подтвердит.')
-  }
+  // Обработка нажатия на главную кнопку
+  tg.MainButton.onClick(() => {
+    if (!selectedService) return;
+
+    tg.showConfirm(`Записаться на "${selectedService.name}"?`, (confirm) => {
+      if (confirm) {
+        // Отправляем данные боту (закроет Mini App автоматически)
+        tg.sendData(JSON.stringify({
+          action: 'booking',
+          service: selectedService.name,
+          price: selectedService.price
+        }));
+      }
+    });
+  });
 </script>
 
 </body>
